@@ -20,7 +20,7 @@
         <label for="title">제목 : </label>
         <input type="text" name="title" id="title" value="{{old('title') !== null ? old('title') : $data->title}}">
         <br>
-        <label for="content">제목 : </label>
+        <label for="content">내용 : </label>
         <textarea name="content" id="content">{{count($errors) > 0 ? old('content') : $data->content}}</textarea>
         <br>
         <button type="submit">수정</button>
