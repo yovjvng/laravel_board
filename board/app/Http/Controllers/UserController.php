@@ -13,23 +13,41 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
     function login() {
+
+        $arr['key'] = 'test';
+        $arr['kim'] = 'park';
+        Log::emergency('emergency', $arr);
+        Log::alert('alert', $arr);
+        Log::critical('critical', $arr);
+        Log::error('error', $arr);
+        Log::warning('warning', $arr);
+        Log::notice('notice', $arr);
+        Log::info('info', $arr);
+        Log::debug('debug', $arr);
+
         return view('login');
     }
 
     function loginpost(Request $req) {
+
+        // Log::debug('로그인 시작');
         // 유효성 체크
         $req->validate([
             'email'    => 'required|email|max:100'
             ,'password' => 'required|regex:/^(?=.*[a-zA-Z])(?=.*[!@#$%^*-])(?=.*[0-9]).{8,20}$/'
         ]);
 
+        // Log::debug('유효성 OK');
+
         // 유저정보 습득
         $user = User::where('email', $req->email)->first();
         if(!$user || !(Hash::check($req->password, $user->password))) {
+            // Log::debug($req->password. ':' .$user->password);
             $error = '아이디와 비밀번호를 확인해 주세요.';
             return redirect()->back()->with('error', $error);
         }
@@ -38,7 +56,7 @@ class UserController extends Controller
         Auth::login($user);
         if(Auth::check()) {
             session($user->only('id')); // 세션에 인증된 회원 pk 등록
-            return redirect()->intended(route('boards.index'));
+            return redirect()->intended(route('boards.index')); // intended 사용 시 전에 있던 데이터 날리고 redirect
         } else {
             $error = '인증작업 에러';
             return redirect()->back()->with('error', $error);
@@ -104,6 +122,7 @@ class UserController extends Controller
         $same = Hash::check($validate['password'], Auth::user()->password);
         if ($same) {
             return redirect()->back()->with('message', '이전 비밀번호는 사용할 수 없습니다.');
+            // with는 redirect에 붙어있을때 session에 저장한다.
         }
 
         $user = User::find(Auth::user()->id); // 기존 데이터 획득
